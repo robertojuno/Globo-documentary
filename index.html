@@ -28,14 +28,9 @@
       text-align: center;
       font-weight: bold;
       font-size: 24px;
-      color: #0ff;
-      text-shadow:
-        0 0 5px #0ff,
-        0 0 10px #0ff,
-        0 0 20px #0ff,
-        0 0 40px #0ff;
+      color: white;
+      font-family: Arial, sans-serif;
       pointer-events: none;
-      font-family: 'Arial Black', Arial, sans-serif;
     }
   </style>
   <script src="https://unpkg.com/globe.gl"></script>
@@ -78,25 +73,21 @@
 
     // Carica e mostra confini mondo con effetto fluo
     fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(res => res.json()).then(topology => {
-      // converti TopoJSON a GeoJSON
       const countries = topojson.feature(topology, topology.objects.countries).features;
 
       globe
         .polygonsData(countries)
         .polygonAltitude(0.01)
-        .polygonCapColor(() => 'rgba(0,255,255,0.1)')  // trasparente azzurro chiaro
+        .polygonCapColor(() => 'rgba(0,255,255,0.1)')
         .polygonSideColor(() => 'rgba(0,255,255,0.0)')
-        .polygonStrokeColor(() => '#0ff')             // bordo fluo azzurro
-        .polygonLabel(({ properties: d }) => `
-          <b>${d.ADMIN}</b>
-        `)
+        .polygonStrokeColor(() => '#0ff')
+        .polygonLabel(({ properties: d }) => `<b>${d.ADMIN}</b>`)
         .onPolygonHover((hoverD) => {
           globe
             .polygonAltitude(d => d === hoverD ? 0.03 : 0.01)
             .polygonCapColor(d => d === hoverD ? 'rgba(0,255,255,0.3)' : 'rgba(0,255,255,0.1)');
         });
     });
-
   </script>
   <script src="https://unpkg.com/topojson-client@3"></script>
 </body>
