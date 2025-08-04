@@ -13,6 +13,7 @@
       height: 90px;
       box-shadow: 0 0 8px rgba(255,255,255,0.5);
       cursor: pointer;
+      pointer-events: auto;
     }
     .label img {
       width: 100%;
@@ -50,14 +51,18 @@
         const el = document.createElement('div');
         el.className = 'label';
         el.innerHTML = `<img src="https://img.youtube.com/vi/${d.videoId}/hqdefault.jpg" alt="Video Thumbnail">`;
-        el.onclick = () => window.open(`https://youtu.be/${d.videoId}`, '_blank');
+        el.style.pointerEvents = 'auto';
+        el.addEventListener('click', e => {
+          e.stopPropagation();
+          window.open(`https://youtu.be/${d.videoId}`, '_blank', 'noopener,noreferrer');
+        });
         return el;
       });
 
     // Rotazione lenta e continua del globo
     (function rotate() {
       globe.controls().autoRotate = true;
-      globe.controls().autoRotateSpeed = 0.3; // velocità rotazione
+      globe.controls().autoRotateSpeed = 0.3;
       globe.controls().update();
       requestAnimationFrame(rotate);
     })();
