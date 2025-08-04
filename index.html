@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Globo Video con Miniature</title>
+  <title>Globo Video con Miniature e Confini Fluorescenti</title>
   <style>
     body { margin: 0; background: black; overflow: hidden; }
     #globeViz { width: 100vw; height: 100vh; }
@@ -21,24 +21,33 @@
       object-fit: cover;
       display: block;
     }
+    #footer {
+      position: fixed;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+      font-weight: bold;
+      font-size: 24px;
+      color: #0ff;
+      text-shadow:
+        0 0 5px #0ff,
+        0 0 10px #0ff,
+        0 0 20px #0ff,
+        0 0 40px #0ff;
+      pointer-events: none;
+      font-family: 'Arial Black', Arial, sans-serif;
+    }
   </style>
   <script src="https://unpkg.com/globe.gl"></script>
 </head>
 <body>
   <div id="globeViz"></div>
+  <div id="footer">JUNO</div>
 
   <script>
     const data = [
-      {
-        lat: 43.8562586,
-        lng: 18.41330763,
-        videoId: 'GqQKJHXoUD8'
-      },
-      {
-        lat: 28.0026,
-        lng: 86.8528,
-        videoId: 'q7_jPoJM-Jc'
-      }
+      { lat: 43.8562586, lng: 18.41330763, videoId: 'GqQKJHXoUD8' },
+      { lat: 28.0026, lng: 86.8528, videoId: 'q7_jPoJM-Jc' }
     ];
 
     const globe = Globe()(document.getElementById('globeViz'))
@@ -59,13 +68,36 @@
         return el;
       });
 
-    // Rotazione lenta e continua del globo
+    // Rotazione lenta e continua
     (function rotate() {
       globe.controls().autoRotate = true;
       globe.controls().autoRotateSpeed = 0.3;
       globe.controls().update();
       requestAnimationFrame(rotate);
     })();
+
+    // Carica e mostra confini mondo con effetto fluo
+    fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(res => res.json()).then(topology => {
+      // converti TopoJSON a GeoJSON
+      const countries = topojson.feature(topology, topology.objects.countries).features;
+
+      globe
+        .polygonsData(countries)
+        .polygonAltitude(0.01)
+        .polygonCapColor(() => 'rgba(0,255,255,0.1)')  // trasparente azzurro chiaro
+        .polygonSideColor(() => 'rgba(0,255,255,0.0)')
+        .polygonStrokeColor(() => '#0ff')             // bordo fluo azzurro
+        .polygonLabel(({ properties: d }) => `
+          <b>${d.ADMIN}</b>
+        `)
+        .onPolygonHover((hoverD) => {
+          globe
+            .polygonAltitude(d => d === hoverD ? 0.03 : 0.01)
+            .polygonCapColor(d => d === hoverD ? 'rgba(0,255,255,0.3)' : 'rgba(0,255,255,0.1)');
+        });
+    });
+
   </script>
+  <script src="https://unpkg.com/topojson-client@3"></script>
 </body>
 </html>
