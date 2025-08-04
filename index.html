@@ -2,42 +2,65 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Globo Video con Stati</title>
+  <title>Globo Video con Miniature</title>
   <style>
-    body { margin: 0; background: black; }
-    canvas { display: block; }
+    body { margin: 0; background: black; overflow: hidden; }
+    #globeViz { width: 100vw; height: 100vh; }
+    .label {
+      border-radius: 4px;
+      overflow: hidden;
+      width: 120px;
+      height: 90px;
+      box-shadow: 0 0 8px rgba(255,255,255,0.5);
+      cursor: pointer;
+    }
+    .label img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
   </style>
   <script src="https://unpkg.com/globe.gl"></script>
 </head>
 <body>
-  <div id="globeViz" style="width: 100vw; height: 100vh;"></div>
+  <div id="globeViz"></div>
+
   <script>
     const data = [
       {
         lat: 43.8562586,
         lng: 18.41330763,
-        text: 'Sarajevo',
-        link: 'https://youtu.be/GqQKJHXoUD8?si=LWFZ9f0ckd681Trk'
+        videoId: 'GqQKJHXoUD8'
       },
       {
         lat: 28.0026,
         lng: 86.8528,
-        text: 'Everest Basecamp',
-        link: 'https://youtu.be/q7_jPoJM-Jc?si=x0bdF3F7mz2H5CY9'
+        videoId: 'q7_jPoJM-Jc'
       }
     ];
 
-    Globe()
-      (document.getElementById('globeViz'))
+    const globe = Globe()(document.getElementById('globeViz'))
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-day.jpg')
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
       .showAtmosphere(true)
       .pointOfView({ lat: 20, lng: 0, altitude: 2 })
-      .labelsData(data)
-      .labelText('text')
-      .labelSize(1.6)
-      .labelColor(() => 'white')
-      .onLabelClick(d => window.open(d.link, '_blank'));
+      .htmlElementsData(data)
+      .htmlElement(d => {
+        const el = document.createElement('div');
+        el.className = 'label';
+        el.innerHTML = `<img src="https://img.youtube.com/vi/${d.videoId}/hqdefault.jpg" alt="Video Thumbnail">`;
+        el.onclick = () => window.open(`https://youtu.be/${d.videoId}`, '_blank');
+        return el;
+      });
+
+    // Rotazione lenta e continua del globo
+    (function rotate() {
+      globe.controls().autoRotate = true;
+      globe.controls().autoRotateSpeed = 0.3; // velocità rotazione
+      globe.controls().update();
+      requestAnimationFrame(rotate);
+    })();
   </script>
 </body>
 </html>
